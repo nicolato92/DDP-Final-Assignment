@@ -1,0 +1,72 @@
+---
+title: "Final Assignment: Wage Data and Decision Trees Algorithm"
+author: "Nicolas Lara Torres"
+date: "21 de octubre de 2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ISLR)
+library(ggplot2)
+library(caret)
+library(Hmisc)
+library(rattle)
+```
+
+## Context
+
+The Shiny application runs a predictive algorithm using the 'Wage' dataset corresponding to the library 'ISLR'. For that, it is used the **train()** function from the caret package with the method **rpart** to estimate a decision tree algorithm.
+
+The application estimates the *Wage Group* variable, what is defined as the result of the **cutwage()** function from the **Hmisc** package applied to the Wage variable.
+
+See the variables of the data:
+```{r, eval=TRUE,echo=FALSE}
+data(Wage)
+names(Wage)
+```
+
+
+## Interactivity
+
+The user can change the following parameters of the data and/or of the algorithm:
+
+1. Wage: the user can change the range of the values in the wage variable (min and max values) between 20.09 and 318.34.
+
+2. Data partition parameter: the user can change the data partition parameter (between 0.4 and 0.9) used in the **createDataPartition()** function, i.e, the proportion of the data used for the training set versus the testing set.
+
+3. Number of groups: the user can change the number of wage groups, that is the dependent variable estimated by the algorithm. The user can change between 2 and 5 groups.
+
+
+## Results 1
+Example 1: 3 groups, total data and p=0.7
+```{r, echo = FALSE}
+cutwage<-cut2(Wage$wage,g=3)
+Wage$group<-as.character(paste(cutwage))
+inTrain<-createDataPartition(y=Wage$group, p=0.7, lis=FALSE)
+training<-Wage[inTrain,]
+testing<-Wage[-inTrain,]
+fit<-train(group~.-wage-logwage,method="rpart",data=training)
+```
+
+```{r, echo=FALSE}
+fancyRpartPlot(fit$finalModel)
+```
+
+
+## Results 2
+Example 2: 4 groups, subset of the data (85.38, 128.68) and p=0.7
+```{r, echo = FALSE}
+Wage<-subset(Wage, wage>=85.38 & wage<=128.68)
+cutwage<-cut2(Wage$wage,g=4)
+Wage$group<-as.character(paste(cutwage))
+inTrain<-createDataPartition(y=Wage$group, p=0.7, lis=FALSE)
+training<-Wage[inTrain,]
+testing<-Wage[-inTrain,]
+fit2<-train(group~.-wage-logwage,method="rpart",data=training)
+```
+
+```{r, echo=FALSE}
+fancyRpartPlot(fit2$finalModel)
+```
+
